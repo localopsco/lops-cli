@@ -13,6 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+      max-parallel: 1
 
     steps:
       - name: Checkout code
