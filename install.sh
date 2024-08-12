@@ -27,6 +27,7 @@ DOCUMENTATION_LINK="https://docs.localops.co/cli"
 OWNER="localopsco"
 REPO="lops-cli"
 BINARY_NAME="lops"
+TEMP_DIR=$(mktemp -d)
 
 # Get the latest release from GitHub API
 LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/$OWNER/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"tag_name": "(.*)".*/\1/')
@@ -46,8 +47,8 @@ fi
 # Construct the download URL and asset name
 ASSET_NAME_WITHOUT_EXT="$OS-$ARCH"
 ASSET_EXT="tar.gz"
-OUT_DIR="$ASSET_NAME_WITHOUT_EXT"
 ASSET_NAME="$ASSET_NAME_WITHOUT_EXT.$ASSET_EXT"
+DOWNLOAD_TARGET="$TEMP_DIR/$ASSET_NAME"
 
 # Asset URL
 DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$ASSET_NAME"
@@ -65,7 +66,7 @@ print "Installing $PRODUCT_NAME version $VERSION"
 
 # Download the asset
 print "Downloading asset $ASSET_NAME..."
-HTTP_STATUS=$(curl --progress-bar -L -o "$ASSET_NAME" -w "%{http_code}" "$DOWNLOAD_URL")
+HTTP_STATUS=$(curl --progress-bar -L -o "$DOWNLOAD_TARGET" -w "%{http_code}" "$DOWNLOAD_URL")
 STATUS=$?
 
 # Clear the progress bar after request
@@ -89,21 +90,20 @@ print "$ASSET_NAME downloaded successfully"
 # Extract downloaded file
 if [[ "$ASSET_NAME" == *.$ASSET_EXT ]]; then
     print "Extracting $ASSET_NAME..."
-    tar -xf "$ASSET_NAME"
+    tar -xf "$DOWNLOAD_TARGET" -C $TEMP_DIR
 else
     exitWithError "Unrecognized file format: $ASSET_NAME"
 fi
 
-print "Files extracted to $OUT_DIR/"
+print "Files extracted to temp directory: $TEMP_DIR/"
 
 # Move the binary to /usr/local/bin (or another directory in the PATH)
 print "Installing $PRODUCT_NAME. Enter password if requested"
-sudo mv "$OUT_DIR/$BINARY_NAME" /usr/local/bin/
+sudo mv "$TEMP_DIR/$BINARY_NAME" /usr/local/bin/
 
 # Clean up the downloaded file
 print "Performing cleanup. Removing downloaded files..."
-rm -rf "$OUT_DIR"
-rm "$ASSET_NAME"
+rm -rf "$TEMP_DIR"
 print "Cleanup complete"
 
 # Verify installation
