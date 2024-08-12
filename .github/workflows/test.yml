@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Upload build outputs
+      - name: Install CLI
         run: sh install.sh
         env:
           TERM: xterm
