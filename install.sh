@@ -44,8 +44,10 @@ elif [ "$ARCH" == "aarch64" ]; then
 fi
 
 # Construct the download URL and asset name
-ASSET_NAME="$OS-$ARCH".tar
-OUTPUT_DIRECTORY="$OS-$ARCH"
+ASSET_NAME_WITHOUT_EXT="$OS-$ARCH"
+ASSET_EXT="tar.gz"
+OUT_DIR="$ASSET_NAME_WITHOUT_EXT"
+ASSET_NAME="$ASSET_NAME_WITHOUT_EXT.$ASSET_EXT"
 
 # Asset URL
 DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$ASSET_NAME"
@@ -69,6 +71,11 @@ STATUS=$?
 # Clear the progress bar after request
 clearLastLine
 
+# Cleanup asset if download fails
+if [ $STATUS -ne 0 ] || [ "$HTTP_STATUS" -ne 200 ]; then
+    rm "$ASSET_NAME"
+fi
+
 if [ $STATUS -ne 0 ]; then
     exitWithError "Request failed CURL status code: $STATUS"
 elif [ "$HTTP_STATUS" -eq 404 ]; then
@@ -87,15 +94,15 @@ else
     exitWithError "Unrecognized file format: $ASSET_NAME"
 fi
 
-print "Files extracted to $OUTPUT_DIRECTORY/"
+print "Files extracted to $OUT_DIR/"
 
 # Move the binary to /usr/local/bin (or another directory in the PATH)
 print "Installing $PRODUCT_NAME. Enter password if requested"
-sudo mv "$OUTPUT_DIRECTORY/$BINARY_NAME" /usr/local/bin/
+sudo mv "$OUT_DIR/$BINARY_NAME" /usr/local/bin/
 
 # Clean up the downloaded file
 print "Performing cleanup. Removing downloaded files..."
-rm -rf "$OUTPUT_DIRECTORY"
+rm -rf "$OUT_DIR"
 rm "$ASSET_NAME"
 print "Cleanup complete"
 
