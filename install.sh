@@ -6,19 +6,53 @@
 # ██      ██    ██ ██      ██   ██ ██      ██    ██ ██           ██     ██      ██      ██
 # ███████  ██████   ██████ ██   ██ ███████  ██████  ██      ███████      ██████ ███████ ██
 
-# color codes
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+set -e
+
+# The [ -t 1 ] check only works when the function is not called from
+# a subshell (like in `$(...)` or `(...)`, so this hack redefines the
+# function at the top level to always return false when stdout is not
+# a tty.
+if [ -t 1 ]; then
+  is_tty() { true; }
+else
+  is_tty() { false; }
+fi
+
+setup_color() {
+  # Only use colors if connected to a terminal
+  if is_tty; then
+    YELLOW='\033[1;33m'
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    NC='\033[0m' # No Color
+    return
+  else
+    YELLOW=''
+    RED=''
+    GREEN=''
+    NC=''
+  fi
+}
+
+setup_color
 
 # helpers
-print() { echo " - $1"; }
-warning() { echo "${YELLOW}$1${NC}"; }
-error() { echo "${RED}$1${NC}"; }
-success() { echo "${GREEN}$1${NC}"; }
+info() { echo " - $1"; }
+warning() { printf "${YELLOW}$1${NC}\n"; }
+error() { printf "${RED}$1${NC}\n"; }
+success() { printf "${GREEN}$1${NC}\n"; }
 clearLastLine() { tput cuu1 && tput el && tput el1; }
 exitWithError() { error "\nError: $1"; exit 1; }
+
+# Function to check if sudo access is available
+has_sudo_access() {
+    sudo -n true 2>/dev/null
+    if [ $? -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 # Set repository details
 PRODUCT_NAME="LocalOps CLI"
@@ -54,18 +88,18 @@ DOWNLOAD_TARGET="$TEMP_DIR/$ASSET_NAME"
 DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$ASSET_NAME"
 
 if [ -z "${VERSION}" ]; then
-  exitWithError "Failed to install $PRODUCT_NAME. Unable to determine CLI version."
+    exitWithError "Failed to install $PRODUCT_NAME. Unable to determine CLI version."
 fi
 
 # check if downloaded version is latest
 if [ "$VERSION" != "$LATEST_RELEASE" ]; then
-  warning "Latest version available: $LATEST_RELEASE"
+    warning "\nLatest version available: $LATEST_RELEASE\n"
 fi
 
-print "Installing $PRODUCT_NAME version $VERSION"
+info "Installing $PRODUCT_NAME version $VERSION"
 
 # Download the asset
-print "Downloading asset $ASSET_NAME..."
+info "Downloading asset $ASSET_NAME..."
 HTTP_STATUS=$(curl --progress-bar -L -o "$DOWNLOAD_TARGET" -w "%{http_code}" "$DOWNLOAD_URL")
 STATUS=$?
 
@@ -85,29 +119,34 @@ elif [ "$HTTP_STATUS" -ne 200 ]; then
     exitWithError "HTTP request failed with HTTP status code: $HTTP_STATUS"
 fi
 
-print "$ASSET_NAME downloaded successfully"
+info "$ASSET_NAME downloaded successfully"
 
 # Extract downloaded file
 if [[ "$ASSET_NAME" == *.$ASSET_EXT ]]; then
-    print "Extracting $ASSET_NAME..."
+    info "Extracting $ASSET_NAME..."
     tar -xf "$DOWNLOAD_TARGET" -C $TEMP_DIR
 else
     exitWithError "Unrecognized file format: $ASSET_NAME"
 fi
 
-print "Files extracted to temp directory: $TEMP_DIR/"
+info "Files extracted to temp directory: $TEMP_DIR/"
 
 # Move the binary to /usr/local/bin (or another directory in the PATH)
-print "Installing $PRODUCT_NAME. Enter password if requested"
+info "Installing $PRODUCT_NAME."
+MOVE_BINARY_NOTICE="Moving $BINARY_NAME cli to your PATH"
+if ! has_sudo_access; then
+    MOVE_BINARY_NOTICE+=". Enter your password to continue"
+fi
+info "$MOVE_BINARY_NOTICE"
 sudo mv "$TEMP_DIR/$BINARY_NAME" /usr/local/bin/
 
 # Clean up the downloaded file
-print "Performing cleanup. Removing downloaded files..."
+info "Performing cleanup. Removing downloaded files..."
 rm -rf "$TEMP_DIR"
-print "Cleanup complete"
+info "Cleanup complete"
 
 # Verify installation
-print "Verifying installation..."
+info "Verifying installation..."
 if command -v "$BINARY_NAME" &> /dev/null; then
     success "🚀 $BINARY_NAME has been installed successfully and added to your PATH."
     echo ""
@@ -127,7 +166,6 @@ if command -v "$BINARY_NAME" &> /dev/null; then
     echo "Support:"
     echo "   Reach us at $SUPPORT_EMAIL"
     echo ""
-
 else
     exitWithError "$PRODUCT_NAME installation failed. Please try again or contact us at $SUPPORT_EMAIL"
 fi
