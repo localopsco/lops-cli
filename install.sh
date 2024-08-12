@@ -98,13 +98,24 @@ fi
 
 info "Installing $PRODUCT_NAME version $VERSION"
 
+if is_tty; then
+    # If output is a TTY, show progress bar
+    CURL_PROGRESS_OPTION="--progress-bar"
+else
+    # If output is not a TTY, disable progress bar
+    CURL_PROGRESS_OPTION="--no-progress-meter"
+fi
+
 # Download the asset
 info "Downloading asset $ASSET_NAME..."
-HTTP_STATUS=$(curl --progress-bar -L -o "$DOWNLOAD_TARGET" -w "%{http_code}" "$DOWNLOAD_URL")
+HTTP_STATUS=$(curl $CURL_PROGRESS_OPTION -L -o "$DOWNLOAD_TARGET" -w "%{http_code}" "$DOWNLOAD_URL")
 STATUS=$?
 
-# Clear the progress bar after request
-clearLastLine
+if is_tty; then
+    # Progress is enable only if on tty
+    # Clear the progress bar after request
+    clearLastLine
+fi
 
 # Cleanup asset if download fails
 if [ $STATUS -ne 0 ] || [ "$HTTP_STATUS" -ne 200 ]; then
