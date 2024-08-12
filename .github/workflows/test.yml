@@ -7,7 +7,11 @@ on:
 
 jobs:
   verify:
-    runs-on: macos-latest
+    runs-on: Install in ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout code
@@ -32,15 +36,15 @@ jobs:
       - name: Get recent tag
         run: echo "LATEST_GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
 
-      - name: Verify Version
+      - name: Get LocalOps CLI version
         run: echo "LOCALOPS_CLI_VERSION=`echo $(lops version)`" >> $GITHUB_ENV
 
       - name: Print Env
         run: |
-          echo $LATEST_GIT_TAG
-          echo $LOCALOPS_CLI_VERSION
+          echo "Latest git tag: $LATEST_GIT_TAG"
+          echo "Installed LocalOps CLI version: $LOCALOPS_CLI_VERSION"
 
-      - name: Verify CLI version with latest
+      - name: Verify CLI version with latest git tag
         run: |
           if [ "${LATEST_GIT_TAG#v}" != "$LOCALOPS_CLI_VERSION" ]; then
             echo "Installed incorrect cli version"
