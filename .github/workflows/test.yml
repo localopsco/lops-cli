@@ -21,8 +21,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get recent tag
+        run: echo "LATEST_GIT_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
       - name: Install CLI
-        run: bash install.sh
+        # manually sending version to avoid ratelimiting errors within actions
+        run: bash install.sh ${{ env.LATEST_GIT_TAG }}
         env:
           TERM: xterm
 
@@ -35,11 +39,8 @@ jobs:
             echo "LocalOps cli is installed"
           fi
 
-      - name: Get recent tag
-        run: echo "LATEST_GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
-
       - name: Get LocalOps CLI version
-        run: echo "LOCALOPS_CLI_VERSION=`echo $(lops version)`" >> $GITHUB_ENV
+        run: echo "LOCALOPS_CLI_VERSION=$(lops version)" >> $GITHUB_ENV
 
       - name: Print Env
         run: |
