@@ -87,7 +87,7 @@ fi
 print "$ASSET_NAME downloaded successfully"
 
 # Extract downloaded file
-if [[ "$ASSET_NAME" == *.tar ]]; then
+if [[ "$ASSET_NAME" == *.$ASSET_EXT ]]; then
     print "Extracting $ASSET_NAME..."
     tar -xf "$ASSET_NAME"
 else
