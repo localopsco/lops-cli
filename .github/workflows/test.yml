@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install CLI
-        run: sh install.sh
+        run: bash install.sh
         env:
           TERM: xterm
 
