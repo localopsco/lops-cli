@@ -1,0 +1,39 @@
+name: Verify Installation Script
+
+on:
+  push:
+    branches: main
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload build outputs
+        run: sh install.sh
+
+      - name: Check if curl exists
+        run: |
+          if ! command -v curl > /dev/null 2>&1; then
+            echo "LocalOps cli not found"
+            exit 1
+          else
+            echo "LocalOps cli is installed"
+          fi
+
+      - name: Get recent tag
+        run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
+
+      - name: Verify Version
+        run: echo "LOCALOPS_CLI_VERSION=`echo $(lops version)`" >> $GITHUB_ENV
+
+      - name: Verify CLI version with latest
+        run: |
+          if [ "$GIT_TAG" != "$LOCALOPS_CLI_VERSION" ]; then
+            echo "Installed incorrect cli version"
+            exit 1
+          fi
