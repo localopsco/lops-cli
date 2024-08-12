@@ -42,7 +42,7 @@ jobs:
 
       - name: Verify CLI version with latest
         run: |
-          if [ "$LATEST_GIT_TAG" != "$LOCALOPS_CLI_VERSION" ]; then
+          if [ "${LATEST_GIT_TAG#v}" != "$LOCALOPS_CLI_VERSION" ]; then
             echo "Installed incorrect cli version"
             exit 1
           fi
