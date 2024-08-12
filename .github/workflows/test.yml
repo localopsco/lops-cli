@@ -15,6 +15,8 @@ jobs:
 
       - name: Upload build outputs
         run: sh install.sh
+        env:
+          TERM: xterm
 
       - name: Check if curl exists
         run: |
