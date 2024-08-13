@@ -79,7 +79,7 @@ elif [ "$ARCH" == "aarch64" ]; then
 fi
 
 # Construct the download URL and asset name
-ASSET_NAME_WITHOUT_EXT="$OS-$ARCH"
+ASSET_NAME_WITHOUT_EXT="${BINARY_NAME}-$OS-$ARCH"
 ASSET_EXT="tar.gz"
 ASSET_NAME="$ASSET_NAME_WITHOUT_EXT.$ASSET_EXT"
 DOWNLOAD_TARGET="$TEMP_DIR/$ASSET_NAME"
