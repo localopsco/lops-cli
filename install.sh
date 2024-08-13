@@ -54,10 +54,25 @@ has_sudo_access() {
     fi
 }
 
+# Determine OS and architecture
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+if [ "$ARCH" == "x86_64" ]; then
+    ARCH="amd64"
+elif [ "$ARCH" == "aarch64" ]; then
+    ARCH="arm64"
+fi
+
+OS_NAME=$OS
+
+if [ "$OS" == 'darwin' ]; then
+  OS_NAME='macos'
+fi
+
 # Set repository details
 PRODUCT_NAME="LocalOps CLI"
 SUPPORT_EMAIL="help@localops.co"
-DOCUMENTATION_LINK="https://docs.localops.co/cli"
+DOCUMENTATION_LINK="https://docs.localops.co/cli/install-$OS_NAME"
 OWNER="localopsco"
 REPO="lops-cli"
 BINARY_NAME="lops"
@@ -68,15 +83,6 @@ LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/$OWNER/$REPO/releas
 
 # Use the first argument as the version if provided, otherwise fallback to LATEST_RELEASE
 VERSION=${1:-$LATEST_RELEASE}
-
-# Determine OS and architecture
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m)
-if [ "$ARCH" == "x86_64" ]; then
-    ARCH="amd64"
-elif [ "$ARCH" == "aarch64" ]; then
-    ARCH="arm64"
-fi
 
 # Construct the download URL and asset name
 ASSET_NAME_WITHOUT_EXT="${BINARY_NAME}-$OS-$ARCH"
