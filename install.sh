@@ -77,6 +77,7 @@ OWNER="localopsco"
 REPO="lops-cli"
 BINARY_NAME="lops"
 TEMP_DIR=$(mktemp -d)
+BIN_PATH="/usr/local/bin/"
 
 # Get the latest release from GitHub API
 LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/$OWNER/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"tag_name": "(.*)".*/\1/')
@@ -148,14 +149,14 @@ fi
 
 info "Files extracted to temp directory: $TEMP_DIR/"
 
-# Move the binary to /usr/local/bin (or another directory in the PATH)
+# Move the binary to /usr/local/bin
 info "Installing $PRODUCT_NAME."
 MOVE_BINARY_NOTICE="Moving $BINARY_NAME cli to your PATH"
 if ! has_sudo_access; then
     MOVE_BINARY_NOTICE+=". Enter your password to continue"
 fi
 info "$MOVE_BINARY_NOTICE"
-sudo mv "$TEMP_DIR/$BINARY_NAME" /usr/local/bin/
+sudo mv "$TEMP_DIR/$BINARY_NAME" $BIN_PATH
 
 # Clean up the downloaded file
 info "Performing cleanup. Removing downloaded files..."
