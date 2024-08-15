@@ -54,7 +54,6 @@ while true; do
     esac
 done
 
-
 newLine
 info "Enter your password to uninstall $BINARY_NAME cli"
 
@@ -66,4 +65,4 @@ sudo rm -f "$BIN_PATH/$BINARY_NAME"
 
 info "Cleanup residual files"
 
-warning "\$PRODUCT_NAME uninstalled successfully :(\n"
+warning "\n$PRODUCT_NAME uninstalled successfully :(\n"
