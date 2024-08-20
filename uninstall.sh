@@ -42,7 +42,7 @@ newLine() { echo ""; }
 warning() { printf "${YELLOW}$1${NC}\n"; }
 
 PRODUCT_NAME="LocalOps CLI"
-BINARY_NAME="lops"
+BINARY_NAME="ops"
 BIN_PATH="/usr/local/bin"
 
 while true; do

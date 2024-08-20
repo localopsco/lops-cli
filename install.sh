@@ -75,7 +75,7 @@ SUPPORT_EMAIL="help@localops.co"
 DOCUMENTATION_LINK="https://docs.localops.co/cli/install-$OS_NAME"
 OWNER="localopsco"
 REPO="lops-cli"
-BINARY_NAME="lops"
+BINARY_NAME="ops"
 TEMP_DIR=$(mktemp -d)
 BIN_PATH="/usr/local/bin/"
 
