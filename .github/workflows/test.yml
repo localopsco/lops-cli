@@ -16,7 +16,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-      max-parallel: 1
 
     steps:
       - name: Checkout code
@@ -35,7 +34,7 @@ jobs:
 
       - name: Check if cli is installed
         run: |
-          if ! command -v lops > /dev/null 2>&1; then
+          if ! command -v ops > /dev/null 2>&1; then
             echo "LocalOps cli not found"
             exit 1
           else
