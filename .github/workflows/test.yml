@@ -42,7 +42,7 @@ jobs:
           fi
 
       - name: Get LocalOps CLI version
-        run: echo "LOCALOPS_CLI_VERSION=$(lops version)" >> $GITHUB_ENV
+        run: echo "LOCALOPS_CLI_VERSION=$(ops version)" >> $GITHUB_ENV
 
       - name: Print Env
         run: |
